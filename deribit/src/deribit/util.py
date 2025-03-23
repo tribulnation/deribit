@@ -27,11 +27,14 @@ def getenv(var: str):
     return os.environ[var]
   return getter
 
+class dates:
+  @staticmethod
+  def parse(value: str):
+    """Parse date in `DDMMMYY` (e.g `25JUN24`) format."""
+    return datetime.strptime(value, '%d%b%y').date()
+  
+  @staticmethod
+  def dump(value: date | str):
+    return f'{value:%d%b%y}'.upper() if isinstance(value, date) else value
 
-def parse_date(value):
-  """Parse date in `DDMMMYY` (e.g `25JUN24`) format."""
-  if isinstance(value, str):
-    value = datetime.strptime(value, '%d%b%y').date()
-  return value
-
-Date = Annotated[date, BeforeValidator(parse_date)]
+Date = Annotated[date, BeforeValidator(dates.parse)]
