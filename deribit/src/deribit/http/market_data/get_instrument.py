@@ -10,10 +10,10 @@ class TickSizeStep(BaseModel):
 
 class InstrumentInfo(BaseModel):
   base_currency: str
-  block_trade_commission: Decimal
-  block_trade_min_trade_amount: Decimal
-  block_trade_tick_size: Decimal
-  contract_size: int
+  block_trade_commission: Decimal | None = None
+  block_trade_min_trade_amount: Decimal | None = None
+  block_trade_tick_size: Decimal | None = None
+  contract_size: Decimal
   counter_currency: str
   creation_timestamp: int
   expiration_timestamp: int | None = None

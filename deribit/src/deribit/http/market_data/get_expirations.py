@@ -1,9 +1,7 @@
-from typing_extensions import Literal, overload, TypeVar, Any
+from typing_extensions import Literal, overload
 from pydantic import BaseModel, RootModel
 from deribit.http.client import Client
 from deribit.util import Date
-
-C = TypeVar('C', bound=str)
 
 Kind = Literal['future', 'option', 'any']
 Expiry = Date | Literal['PERPETUAL']
@@ -21,9 +19,9 @@ class AnyExpirations(BaseModel):
   future: list[Expiry]
   option: list[Expiry]
 
-GroupedAnyExpirations = RootModel[dict[C, AnyExpirations]]
-GroupedFutureExpirations = RootModel[dict[C, FutureExpirations]]
-GroupedOptionExpirations = RootModel[dict[C, OptionExpirations]]
+GroupedAnyExpirations = RootModel[dict[str, AnyExpirations]]
+GroupedFutureExpirations = RootModel[dict[str, FutureExpirations]]
+GroupedOptionExpirations = RootModel[dict[str, OptionExpirations]]
 
 class GetExpirations:
   client: Client
@@ -54,11 +52,11 @@ class GetExpirations:
     r = await self.client.get('public/get_expirations', params=params)
     if currency == 'grouped':
       if kind == 'any':
-        return GroupedAnyExpirations[str].model_validate(r.result).root
+        return GroupedAnyExpirations.model_validate(r.result).root
       elif kind == 'future':
-        return GroupedFutureExpirations[str].model_validate(r.result).root
+        return GroupedFutureExpirations.model_validate(r.result).root
       else:
-        return GroupedOptionExpirations[str].model_validate(r.result).root
+        return GroupedOptionExpirations.model_validate(r.result).root
     
     elif currency == 'any':
       if kind == 'any':
@@ -70,8 +68,10 @@ class GetExpirations:
 
     else:
       if kind == 'any':
-        return GroupedAnyExpirations[lit(currency)].model_validate(r.result).root[currency]
+        model = GroupedAnyExpirations.model_validate(r.result)
       elif kind == 'future':
-        return GroupedFutureExpirations[lit(currency)].model_validate(r.result).root[currency]
+        model = GroupedFutureExpirations.model_validate(r.result)
       else:
-        return GroupedOptionExpirations[lit(currency)].model_validate(r.result).root[currency]
+        model = GroupedOptionExpirations.model_validate(r.result)
+
+      return next(iter(model.root.values()))

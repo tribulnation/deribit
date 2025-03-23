@@ -1,5 +1,6 @@
 # deribit/http/market_data/get_volatility_index_data.py
 
+from typing_extensions import Literal
 from pydantic import BaseModel
 from deribit.http.client import Client
 
@@ -14,10 +15,18 @@ class VolatilityResult(BaseModel):
   continuation: int | None = None
   data: list[VolatilityCandle]
 
+Resolution = Literal[
+  '1',
+  '60',
+  '3600',
+  '43200',
+  '1D',
+]
+
 class GetVolatilityIndexData:
   client: Client
 
-  async def get_volatility_index_data(self, currency: str, start_timestamp: int, end_timestamp: int, resolution: str) -> VolatilityResult:
+  async def get_volatility_index_data(self, currency: str, start_timestamp: int, end_timestamp: int, resolution: Resolution) -> VolatilityResult:
     r = await self.client.get('public/get_volatility_index_data', params={
       'currency': currency,
       'start_timestamp': start_timestamp,

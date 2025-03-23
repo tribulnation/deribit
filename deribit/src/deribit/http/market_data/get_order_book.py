@@ -6,8 +6,8 @@ from typing import Literal
 from deribit.http.client import Client
 
 class Stats(BaseModel):
-  high: float
-  low: float
+  high: float | None = None
+  low: float | None = None
   price_change: float | None = None
   volume: Decimal
   volume_usd: Decimal | None = None
@@ -35,12 +35,12 @@ class OrderBook(BaseModel):
   index_price: float
   instrument_name: str
   interest_rate: float | None = None
-  last_price: float
+  last_price: float | None = None
   mark_iv: float | None = None
   mark_price: float
   max_price: float
   min_price: float
-  open_interest: Decimal
+  open_interest: Decimal | None = None
   settlement_price: float | None = None
   state: Literal['open', 'closed']
   stats: Stats
