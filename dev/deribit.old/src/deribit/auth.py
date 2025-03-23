@@ -1,3 +1,4 @@
+from typing_extensions import Any
 from dataclasses import dataclass
 from pydantic import BaseModel
 from datetime import datetime, timedelta
@@ -57,5 +58,5 @@ class AuthedClient:
   auth: AuthResponse  
 
   # TODO: check whether `self.auth.expires_at < datetime.now() - timedelta(seconds=5)`
-  async def authed_request(self, msg: dict) -> dict:
+  async def authed_request(self, msg: dict) -> Any:
     return await self.client.request({'access_token': self.auth.access_token, **msg})

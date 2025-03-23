@@ -81,7 +81,7 @@ class SocketClient:
       import traceback
       traceback.print_exc()
 
-  async def request(self, msg: dict):
+  async def request(self, msg: dict) -> Any:
     self._id += 1
     id = self._id
     if self.debug:

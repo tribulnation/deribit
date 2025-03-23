@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Deribit API client"
 dependencies = [
-  "httpx", "pydantic",
+  "websockets", "pydantic"
 ]
 requires-python = ">=3.10"
 readme = {file="README.md", content-type="text/markdown"}
