@@ -41,10 +41,14 @@ class HMACClient(AuthedClient):
     if query:
       uri += f'?{query}'
       path += f'?{query}'
+    
+    if json:
+      from json import dumps
+      body = dumps(json)
 
     auth_header = self.auth_header(method=method, uri=uri, body=body)
     signed_headers = {
       'Authorization': auth_header,
       **(headers or {}),
     }
-    return await self.request(method, path, body=body, json=json, headers=signed_headers, params=None)
+    return await self.request(method, path, body=body, json=None, headers=signed_headers, params=None)
