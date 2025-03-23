@@ -1,9 +1,7 @@
 import pytest
-from deribit.http.client import Client
-from deribit.http.market_data import MarketData
+from . import MarketData
 
-client = MarketData(Client.testnet())
-
+client = MarketData()
 
 @pytest.mark.asyncio
 async def test_get_book_summary_by_currency():

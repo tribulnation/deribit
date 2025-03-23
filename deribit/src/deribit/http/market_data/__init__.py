@@ -1,6 +1,6 @@
 # deribit/http/market_data/__init__.py
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from deribit.http.client import Client
 
 from .get_book_summary_by_currency import GetBookSummaryByCurrency
@@ -67,4 +67,8 @@ class MarketData(
   GetVolatilityIndexData,
   GetTicker,
 ):
-  client: Client
+  client: Client = field(default_factory=Client)
+
+  @classmethod
+  def testnet(cls):
+    return cls(client=Client.testnet())
