@@ -12,8 +12,8 @@ class Greeks(BaseModel):
   vega: float
 
 class Stats(BaseModel):
-  high: float
-  low: float
+  high: float | None = None
+  low: float | None = None
   price_change: float | None = None
   volume: float
   volume_usd: float | None = None
@@ -34,12 +34,12 @@ class TickerResult(BaseModel):
   instrument_name: str
   interest_rate: float | None = None
   interest_value: float | None = None
-  last_price: float
+  last_price: float | None = None
   mark_iv: float | None = None
   mark_price: float
   max_price: float
   min_price: float
-  open_interest: float
+  open_interest: float | None = None
   settlement_price: float | None = None
   state: Literal['open', 'closed']
   stats: Stats
