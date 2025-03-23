@@ -1,4 +1,6 @@
-from datetime import datetime
+from typing import Annotated
+from datetime import datetime, date
+from pydantic import BeforeValidator
 from decimal import Decimal, ROUND_HALF_DOWN
 
 def round2tick(x: Decimal, tick_size: Decimal) -> Decimal:
@@ -24,3 +26,12 @@ def getenv(var: str):
     import os
     return os.environ[var]
   return getter
+
+
+def parse_date(value):
+  """Parse date in `DDMMMYY` (e.g `25JUN24`) format."""
+  if isinstance(value, str):
+    value = datetime.strptime(value, '%d%b%y').date()
+  return value
+
+Date = Annotated[date, BeforeValidator(parse_date)]

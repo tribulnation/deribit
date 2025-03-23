@@ -1,12 +1,13 @@
 # deribit/http/market_data/get_delivery_prices.py
 
-import datetime
+from datetime import date
+from decimal import Decimal
 from pydantic import BaseModel, RootModel
 from deribit.http.client import Client
 
 class DeliveryPriceEntry(BaseModel):
-  date: datetime.date
-  delivery_price: float
+  date: date
+  delivery_price: Decimal
 
 class DeliveryPricesResult(BaseModel):
   data: list[DeliveryPriceEntry]

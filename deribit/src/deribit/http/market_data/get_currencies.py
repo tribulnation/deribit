@@ -1,11 +1,12 @@
 # deribit/http/market_data/get_currencies.py
 
 from pydantic import BaseModel, RootModel
+from decimal import Decimal
 from deribit.http.client import Client
 
 class WithdrawalPriority(BaseModel):
   name: str
-  value: float
+  value: Decimal
 
 class Currency(BaseModel):
   coin_type: str
@@ -14,8 +15,8 @@ class Currency(BaseModel):
   fee_precision: int
   in_cross_collateral_pool: bool
   min_confirmations: int
-  min_withdrawal_fee: float
-  withdrawal_fee: float
+  min_withdrawal_fee: Decimal
+  withdrawal_fee: Decimal
   withdrawal_priorities: list[WithdrawalPriority]
 
 class Currencies(RootModel):

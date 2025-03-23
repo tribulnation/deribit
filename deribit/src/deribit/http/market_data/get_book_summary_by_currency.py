@@ -1,6 +1,7 @@
 # deribit/http/market_data/get_book_summary_by_currency.py
 
 from typing import Literal, Union
+from decimal import Decimal
 from pydantic import BaseModel, RootModel
 from deribit.http.client import Client
 
@@ -10,35 +11,35 @@ Kind = Literal[
 ]
 
 class BookSummaryBase(BaseModel):
-  ask_price: float | None = None
+  ask_price: Decimal | None = None
   base_currency: str
-  bid_price: float | None = None
+  bid_price: Decimal | None = None
   creation_timestamp: int
-  estimated_delivery_price: float | None = None
-  high: float | None = None
+  estimated_delivery_price: Decimal | None = None
+  high: Decimal | None = None
   instrument_name: str
-  last: float | None = None
-  low: float | None = None
-  mark_price: float | None = None
-  mid_price: float | None = None
-  open_interest: float | None = None
-  price_change: float | None = None
+  last: Decimal | None = None
+  low: Decimal | None = None
+  mark_price: Decimal | None = None
+  mid_price: Decimal | None = None
+  open_interest: Decimal | None = None
+  price_change: Decimal | None = None
   quote_currency: str
   underlying_index: str | None = None
-  volume: float
-  volume_notional: float | None = None
-  volume_usd: float | None = None
+  volume: Decimal
+  volume_notional: Decimal | None = None
+  volume_usd: Decimal | None = None
 
 class PerpBookSummary(BookSummaryBase):
   tag: Literal['perp'] = 'perp'
-  current_funding: float
-  funding_8h: float
+  current_funding: Decimal
+  funding_8h: Decimal
 
 class OptionBookSummary(BookSummaryBase):
   tag: Literal['option'] = 'option'
-  interest_rate: float
-  mark_iv: float
-  underlying_price: float
+  interest_rate: Decimal
+  mark_iv: Decimal
+  underlying_price: Decimal
 
 class OtherBookSummary(BookSummaryBase):
   tag: None = None

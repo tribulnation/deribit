@@ -1,3 +1,0 @@
-# Deribit
-
-> Deribit API client

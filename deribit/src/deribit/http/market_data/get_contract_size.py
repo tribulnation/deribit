@@ -5,7 +5,7 @@ from decimal import Decimal
 from deribit.http.client import Client
 
 class Result(BaseModel):
-  contract_size: str
+  contract_size: Decimal
 
 class GetContractSize:
   client: Client
@@ -14,5 +14,4 @@ class GetContractSize:
     r = await self.client.get('public/get_contract_size', params={
       'instrument_name': instrument_name
     })
-    size = Result.model_validate(r.result).contract_size
-    return Decimal(size)
+    return Result.model_validate(r.result).contract_size
