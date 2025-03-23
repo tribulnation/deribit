@@ -1,9 +1,9 @@
+from typing_extensions import Mapping, Any
 from dataclasses import dataclass, field
-from typing_extensions import Mapping
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from deribit.util import getenv
-from .client import Client, Method
+from .client import Client, AuthedClient, Method
 
 class AuthResponse(BaseModel):
   access_token: str
@@ -15,10 +15,10 @@ class AuthData(AuthResponse):
   expires_at: datetime
 
 @dataclass
-class OAuth2Client(Client):
-  auth: AuthData | None = None
-  client_id: str = field(default_factory=getenv('DERIBIT_CLIENT_ID'), kw_only=True)
-  client_secret: str = field(default_factory=getenv('DERIBIT_CLIENT_SECRET'), kw_only=True)
+class OAuth2Client(AuthedClient):
+  client_id: str = field(default_factory=getenv('DERIBIT_CLIENT_ID'), kw_only=True, repr=False)
+  client_secret: str = field(default_factory=getenv('DERIBIT_CLIENT_SECRET'), kw_only=True, repr=False)
+  auth: AuthData | None = field(default=None, init=False)
 
   @Client.with_client
   async def access_token(self):
@@ -56,11 +56,12 @@ class OAuth2Client(Client):
   async def authed_request(
     self, method: Method, path: str, *,
     params: Mapping[str, str|int] | None = None,
-    body: str | None = None,
+    body: str | None = None, json: Any | None = None,
     headers: Mapping[str, str] | None = None,
   ):
     access_token = await self.access_token()
-    return await self.request(method, path, params=params, body=body, headers={
+    return await self.request(method, path, params=params, body=body, json=json, headers={
       'Authorization': f'Bearer {access_token}',
       **(headers or {}),
     })
+  

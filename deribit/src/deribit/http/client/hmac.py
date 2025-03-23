@@ -1,11 +1,11 @@
+from typing_extensions import Mapping, Any
 from dataclasses import dataclass, field
-from typing import Mapping
 import hmac
 import hashlib
 from uuid import uuid4
 from urllib.parse import urlencode
 from deribit.util import timestamp, path_join, getenv
-from .client import Client, Method
+from .client import Client, AuthedClient, Method
 
 def sign(data: bytes, *, secret: str):
   return hmac.new(secret.encode(), data, hashlib.sha256).hexdigest()
@@ -14,10 +14,10 @@ def str2sign(method: str, uri: str, body: str, ts: int, nonce: str):
   return f'{ts}\n{nonce}\n{method}\n{uri}\n{body}\n'
 
 @dataclass
-class HMACClient(Client):
+class HMACClient(AuthedClient):
   """Deribit HTTP client using HMAC authentication."""
-  client_id: str = field(default_factory=getenv('DERIBIT_CLIENT_ID'))
-  client_secret: str = field(default_factory=getenv('DERIBIT_CLIENT_SECRET'))
+  client_id: str = field(default_factory=getenv('DERIBIT_CLIENT_ID'), repr=False)
+  client_secret: str = field(default_factory=getenv('DERIBIT_CLIENT_SECRET'), repr=False)
 
   def auth_header(
     self, *, method: str, uri: str, body: str | None = None,
@@ -33,7 +33,7 @@ class HMACClient(Client):
   async def authed_request(
     self, method: Method, path: str, *,
     params: Mapping[str, str|int] | None = None,
-    body: str | None = None,
+    body: str | None = None, json: Any | None = None,
     headers: Mapping[str, str] | None = None,
   ):
     uri = path_join(self.base_path, path)
@@ -47,4 +47,4 @@ class HMACClient(Client):
       'Authorization': auth_header,
       **(headers or {}),
     }
-    return await super().request(method, path, body=body, headers=signed_headers, params=None)
+    return await self.request(method, path, body=body, json=json, headers=signed_headers, params=None)
