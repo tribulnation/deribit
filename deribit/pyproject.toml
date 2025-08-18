@@ -3,23 +3,21 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "deribit"
+name = "deribit-trading-sdk"
 version = "0.1.0"
 authors = [
-  {name="Marcel Claramunt", email="marcel@moveread.com"}
+  {name="Marcel Claramunt", email="marcel@tribulnation.com"}
 ]
-description = "Deribit API client"
+description = "The unofficial Deribit API SDK, by Tribulnation. Compatible with Trading SDK."
 dependencies = [
-  "httpx", "pydantic",
+  "lazy-loader", "httpx", "pydantic", "protobuf==3.20", "websockets", "dslog",
 ]
 requires-python = ">=3.10"
 readme = {file="README.md", content-type="text/markdown"}
 
 [project.urls]
-repo = "https://github.com/moveread/REPO.git"
+repo = "https://github.com/tribulnation/deribit.git"
 
-# [project.optional-dependencies]
-# test = [
-#   "pytest < 5.0.0",
-#   "pytest-cov[all]"
-# ]
+[project.optional-dependencies]
+sdk = ["trading-sdk"]
+orjson = ["orjson"]

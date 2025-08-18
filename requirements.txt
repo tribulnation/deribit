@@ -1,5 +1,5 @@
 build
 twine
 ipykernel
-verify-import
 pyright
+-e deribit

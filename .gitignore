@@ -7,5 +7,6 @@ __pycache__
 .env
 yarn
 dev
+dev.ipynb
 /create.py
 /data.txt
