@@ -50,4 +50,4 @@ class HttpClient(Client):
     }, headers={
       'User-Agent': 'trading-sdk',
     })
-    return validate_response(r.text) if self.validate() else r.json()
+    return validate_response(r.text) if self.validate else r.json()

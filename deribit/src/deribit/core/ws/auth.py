@@ -55,7 +55,7 @@ class AuthedSocketClient(SocketClient, AuthedClient):
     if 'error' in r:
       raise AuthError(r)
     else:
-      resp: AuthData = validate_auth_response(r['result']) if self.validate() else r['result']
+      resp: AuthData = validate_auth_response(r['result']) if self.validate else r['result']
       return resp
 
   async def open(self):

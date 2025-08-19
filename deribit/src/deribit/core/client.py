@@ -1,20 +1,15 @@
-from typing_extensions import TypedDict, NotRequired, Any, Self, AsyncIterable, Literal
-from dataclasses import dataclass
+from typing_extensions import TypedDict, NotRequired, Any, Self, Literal, TypeVar, Generic
+from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from .validation import validator, ValidationMixin
 
-class BaseMessage(TypedDict):
+T = TypeVar('T', default=Any)
+
+class BaseResponse(TypedDict):
   jsonrpc: str
 
-class BaseResponse(BaseMessage):
-  id: int
-  testnet: bool
-  usIn: int
-  usOut: int
-  usDiff: int
-
-class OkResponse(BaseResponse):
-  result: Any
+class OkResponse(BaseResponse, Generic[T]):
+  result: T
 
 class ApiError(TypedDict):
   code: int
@@ -24,30 +19,18 @@ class ApiError(TypedDict):
 class ErrorResponse(BaseResponse):
   error: ApiError
 
-ApiResponse = OkResponse | ErrorResponse
+ApiResponse = OkResponse[T] | ErrorResponse
 
 ApiResponseT: type[ApiResponse] = ApiResponse # type: ignore
 validate_response = validator(ApiResponseT)
-
-class MessageParams(TypedDict):
-  channel: str
-  label: NotRequired[str|None]
-  data: Any
-
-class ApiNotification(BaseMessage):
-  method: Literal['subscription']
-  params: MessageParams
-
-ApiMessage = ApiNotification | ApiResponse
-
-ApiMessageT: type[ApiMessage] = ApiMessage # type: ignore
-validate_message = validator(ApiMessageT)
 
 DERIBIT_MAINNET = 'www.deribit.com'
 DERIBIT_TESTNET = 'test.deribit.com'
 
 @dataclass
-class Client(ValidationMixin, ABC):
+class Client(ABC):
+  validate: bool = field(kw_only=True, default=True)
+
   @abstractmethod
   async def request(self, path: str, params=None, /) -> ApiResponse:
     ...
@@ -66,7 +49,7 @@ class AuthedClient(Client):
     ...
 
 @dataclass(frozen=True)
-class ClientMixin:
+class ClientMixin(ValidationMixin):
   client: Client
 
   async def request(self, path: str, params=None, /) -> ApiResponse:
@@ -77,6 +60,5 @@ class ClientMixin:
 class AuthedClientMixin(ClientMixin):
   client: AuthedClient
 
-  @abstractmethod
   async def authed_request(self, path: str, params=None, /) -> ApiResponse:
-    ...
+    return await self.authed_request(path, params)
