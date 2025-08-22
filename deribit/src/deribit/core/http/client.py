@@ -51,3 +51,11 @@ class HttpClient(Client):
       'User-Agent': 'trading-sdk',
     })
     return validate_response(r.text) if self.validate else r.json()
+  
+  @with_client
+  async def get(self, path: str, params=None) -> ApiResponse:
+    url = path_join(self.base_url, path)
+    r = await self.client.get(url, params=params, headers={
+      'User-Agent': 'trading-sdk',
+    })
+    return validate_response(r.text) if self.validate else r.json()

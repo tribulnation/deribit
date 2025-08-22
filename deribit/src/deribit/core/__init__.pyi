@@ -4,7 +4,7 @@ from .client import (
   Client, AuthedClient,
   ClientMixin, AuthedClientMixin,
   ApiResponse, OkResponse, ErrorResponse, ApiError, validate_response,
-  DERIBIT_MAINNET, DERIBIT_TESTNET
+  DERIBIT_MAINNET, DERIBIT_TESTNET, DERIBIT_HISTORY
 )
 from .util import timestamp, round2tick, trunc2tick, filter_kwargs, path_join
 from . import http, ws
@@ -15,7 +15,7 @@ __all__ = [
   'Client', 'AuthedClient',
   'ClientMixin', 'AuthedClientMixin',
   'ApiResponse', 'OkResponse', 'ErrorResponse', 'ApiError', 'validate_response',
-  'DERIBIT_MAINNET', 'DERIBIT_TESTNET',
+  'DERIBIT_MAINNET', 'DERIBIT_TESTNET', 'DERIBIT_HISTORY',
   'timestamp', 'round2tick', 'trunc2tick', 'filter_kwargs', 'path_join',
   'http', 'ws',
 ]

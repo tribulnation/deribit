@@ -25,6 +25,7 @@ ApiResponseT: type[ApiResponse] = ApiResponse # type: ignore
 validate_response = validator(ApiResponseT)
 
 DERIBIT_MAINNET = 'www.deribit.com'
+DERIBIT_HISTORY = 'history.deribit.com'
 DERIBIT_TESTNET = 'test.deribit.com'
 
 @dataclass
@@ -34,6 +35,9 @@ class Client(ABC):
   @abstractmethod
   async def request(self, path: str, params=None, /) -> ApiResponse:
     ...
+  
+  async def get(self, path: str, params=None, /) -> ApiResponse:
+    return await self.request(path, params)
 
   @abstractmethod
   async def __aenter__(self) -> Self:
@@ -54,6 +58,16 @@ class ClientMixin(ValidationMixin):
 
   async def request(self, path: str, params=None, /) -> ApiResponse:
     return await self.client.request(path, params)
+  
+  async def get(self, path: str, params=None, /) -> ApiResponse:
+    return await self.client.get(path, params)
+  
+  async def __aenter__(self) -> Self:
+    await self.client.__aenter__()
+    return self
+  
+  async def __aexit__(self, exc_type, exc_value, traceback):
+    await self.client.__aexit__(exc_type, exc_value, traceback)
   
 
 @dataclass(frozen=True)

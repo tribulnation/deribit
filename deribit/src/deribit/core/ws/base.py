@@ -7,7 +7,7 @@ from datetime import timedelta
 import logging
 import websockets
 
-from deribit.core import NetworkError, DERIBIT_MAINNET
+from deribit.core import NetworkError, DERIBIT_MAINNET, path_join
 
 T = TypeVar('T')
 
@@ -26,9 +26,14 @@ class BaseSocketClient(ABC):
   - Restart loop
   - Message handling loop
   """
-  url: str = f'wss://{DERIBIT_MAINNET}/ws/api/v2'
+  domain: str = DERIBIT_MAINNET
+  path: str = '/ws/api/v2'
   timeout: timedelta = timedelta(seconds=10)
   started: asyncio.Event = field(default_factory=asyncio.Event, init=False)
+
+  @property
+  def url(self) -> str:
+    return path_join(f'wss://{self.domain}', self.path)
 
   @property
   async def ctx(self) -> Context:
