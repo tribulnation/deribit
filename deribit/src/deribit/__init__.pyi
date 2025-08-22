@@ -1,8 +1,11 @@
+from ._deribit import Deribit
 from .market_data import MarketData
-from . import core, market_data
+from .account import Account
+from .trading import Trading
 
 __all__ = [
+  'Deribit',
   'MarketData',
-  'core',
-  'market_data',
+  'Account',
+  'Trading',
 ]

@@ -75,4 +75,4 @@ class AuthedClientMixin(ClientMixin):
   client: AuthedClient
 
   async def authed_request(self, path: str, params=None, /) -> ApiResponse:
-    return await self.authed_request(path, params)
+    return await self.client.authed_request(path, params)
