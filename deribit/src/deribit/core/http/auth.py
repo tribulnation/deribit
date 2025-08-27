@@ -45,4 +45,4 @@ class AuthedHTTPClient(HttpClient, AuthedClient):
       'Content-Type': 'application/json',
       'User-Agent': 'trading-sdk',
     })
-    return validate_response(r.text) if self.validate() else json.loads(r.text)
+    return validate_response(r.text) if self.validate else json.loads(r.text)
