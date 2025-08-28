@@ -1,16 +1,16 @@
-from ._deribit import Deribit, DeribitWs
+from ._deribit import Deribit
 from .market_data import MarketData
 from .account import Account
 from .trading import Trading
 from .wallet import Wallet
-from .subscriptions import Subscriptions
+from .subscriptions import Subscriptions, PublicSubscriptions
 
 __all__ = [
   'Deribit',
-  'DeribitWs',
   'MarketData',
   'Account',
   'Trading',
   'Wallet',
   'Subscriptions',
+  'PublicSubscriptions',
 ]

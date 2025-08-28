@@ -29,7 +29,7 @@ class BaseSocketClient(ABC):
   domain: str = DERIBIT_MAINNET
   path: str = '/ws/api/v2'
   timeout: timedelta = timedelta(seconds=10)
-  started: asyncio.Event = field(default_factory=asyncio.Event, init=False)
+  started: asyncio.Event = field(default_factory=asyncio.Event, init=False, repr=False)
 
   @property
   def url(self) -> str:

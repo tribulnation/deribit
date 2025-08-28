@@ -7,7 +7,7 @@ from deribit.core import AuthedClientMixin, ApiResponse, validator
 TimeInForce = Literal['good_til_cancelled', 'good_til_day', 'fill_or_kill', 'immediate_or_cancel']
 
 class BaseOrder(TypedDict):
-  amount: str | int
+  amount: str | int | Decimal
   time_in_force: NotRequired[TimeInForce]
   """
   - `good_til_cancelled` - unfilled order remains in order book until cancelled
@@ -30,12 +30,12 @@ class BaseOrder(TypedDict):
   otoco_config: NotRequired[Sequence['Order']]
   label: NotRequired[str]
   """User-defined label for the order (maximum 64 characters)"""
-  display_amount: NotRequired[str]
+  display_amount: NotRequired[str|Decimal]
   """	Initial display amount for iceberg order. Has to be at least 100 times minimum amount for instrument and ratio of hidden part vs visible part has to be less than 100 as well."""
 
 class LimitOrder(BaseOrder):
   type: Literal['limit']
-  price: str | int
+  price: str | int | Decimal
 
 class MarketOrder(BaseOrder):
   type: Literal['market', 'market_limit']
@@ -45,11 +45,11 @@ class BaseTriggerOrder(BaseOrder):
 
 class ConditionalOrder(BaseTriggerOrder):
   type: Literal['stop_limit', 'take_limit', 'spot_market', 'take_market']
-  trigger_price: str
+  trigger_price: str | int | Decimal
 
 class TrailingStopOrder(BaseTriggerOrder):
   type: Literal['trailing_stop']
-  trigger_offset: str
+  trigger_offset: str | int | Decimal
   """The maximum deviation from the price peak beyond which the order will be triggered"""
 
 Order = LimitOrder | MarketOrder | ConditionalOrder | TrailingStopOrder

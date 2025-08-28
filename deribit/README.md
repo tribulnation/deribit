@@ -1,3 +1,0 @@
-# Deribit
-
-> package_description

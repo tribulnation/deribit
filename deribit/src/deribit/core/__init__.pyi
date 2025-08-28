@@ -1,5 +1,5 @@
 from .exc import Error, NetworkError, UserError, ValidationError, AuthError
-from .validation import ValidationMixin, validator
+from .validation import validator
 from .client import (
   Client, AuthedClient,
   ClientMixin, AuthedClientMixin,
@@ -13,7 +13,7 @@ from . import http, ws
 
 __all__ = [
   'Error', 'NetworkError', 'UserError', 'ValidationError', 'AuthError',
-  'ValidationMixin', 'validator',
+  'validator',
   'Client', 'AuthedClient',
   'ClientMixin', 'AuthedClientMixin',
   'ApiResponse', 'OkResponse', 'ErrorResponse', 'ApiError', 'validate_response',

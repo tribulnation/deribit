@@ -32,11 +32,3 @@ class validator(Generic[T]):
       return self.json(data)
     else:
       return self.python(data)
-
-
-@dataclass(frozen=True)
-class ValidationMixin:
-  default_validate: bool = field(default=True, kw_only=True)
-
-  def validate(self, validate: bool | None = None) -> bool:
-    return self.default_validate if validate is None else validate

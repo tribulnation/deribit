@@ -2,4 +2,9 @@ build
 twine
 ipykernel
 pyright
+python-dotenv
+trading-sdk
+mkdocs
+mkdocs-material
+mkdocstrings[python]
 -e deribit

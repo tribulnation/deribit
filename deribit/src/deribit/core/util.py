@@ -1,6 +1,5 @@
 from typing_extensions import TypeVar, Mapping
 import time
-from functools import cache
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_DOWN, ROUND_FLOOR
 
