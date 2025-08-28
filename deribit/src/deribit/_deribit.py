@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from . import MarketData, Trading, Account, Wallet
+from . import MarketData, Trading, Account, Wallet, Subscriptions
 
 @dataclass(frozen=True)
 class Deribit(
@@ -8,5 +8,12 @@ class Deribit(
   Trading,
   Account,
   Wallet,
+):
+  ...
+
+@dataclass(frozen=True)
+class DeribitWs(
+  Subscriptions,
+  Deribit,
 ):
   ...

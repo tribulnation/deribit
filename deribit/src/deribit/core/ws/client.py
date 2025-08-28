@@ -1,8 +1,8 @@
-from typing_extensions import TypedDict, Mapping, Any, TypeVar, Generic, NotRequired, Literal
+from typing_extensions import TypedDict, Mapping, Any, TypeVar, Generic, NotRequired, Literal, AsyncIterable
 from dataclasses import dataclass
 import json
 
-from deribit.core import Client, ApiError, validator
+from deribit.core import Client, ClientMixin, ApiError, validator, DERIBIT_MAINNET, DERIBIT_TESTNET
 from .multiplex_streams_rpc import MultiplexStreamsRPCSocketClient, Message
 
 T = TypeVar('T', default=Any)
@@ -42,13 +42,26 @@ ApiMessage = ApiNotification | ApiResponse[T]
 ApiMessageT: type[ApiMessage] = ApiMessage # type: ignore
 validate_message = validator(ApiMessageT)
 
+SubscribeResponse = ApiResponse[list[str]]
+SubscribeResponseT: type[SubscribeResponse] = SubscribeResponse # type: ignore
+validate_subscribe_response = validator(SubscribeResponseT)
+
 @dataclass
 class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
+
+  @classmethod
+  def new(cls, *, mainnet: bool = True, validate: bool = True):
+    return cls(
+      domain=DERIBIT_MAINNET if mainnet else DERIBIT_TESTNET,
+      validate=validate,
+    )
   
   async def req_subscription(self, channel: str):
-    return await self.request('/public/subscribe', {
+    r = await self.request('/public/subscribe', {
       'channels': [channel],
     })
+    return validate_subscribe_response(r) if self.validate else r
+
   
   async def req_unsubscription(self, channel: str):
     return await self.request('/public/unsubscribe', {
@@ -86,3 +99,10 @@ class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
       'params': params,
     })
     
+
+@dataclass(frozen=True)
+class SocketMixin(ClientMixin):
+  client: SocketClient
+
+  async def subscribe(self, channel: str) -> tuple[SubscribeResponse, AsyncIterable]:
+    return await self.client.subscribe(channel)

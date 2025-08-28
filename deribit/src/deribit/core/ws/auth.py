@@ -1,19 +1,19 @@
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, AsyncIterable
 from dataclasses import dataclass, field
 import asyncio
 from uuid import uuid4
 import hmac
 import hashlib
 
+from deribit.core import timestamp, AuthedClient, AuthedClientMixin, ApiResponse, validator, AuthError, DERIBIT_MAINNET, DERIBIT_TESTNET
+from .client import SocketClient, SocketMixin, SubscribeResponse, validate_subscribe_response
+from .base import Context, logger
+
 def sign(data: bytes, *, secret: str):
   return hmac.new(secret.encode(), data, hashlib.sha256).hexdigest()
 
 def signature_data(*, ts: int, nonce: str):
   return f'{ts}\n{nonce}\n'.encode()
-
-from deribit.core import timestamp, AuthedClient, ApiResponse, validator, AuthError
-from .base import Context, logger
-from .client import SocketClient
 
 class AuthData(TypedDict):
   access_token: str
@@ -33,6 +33,18 @@ validate_auth_response = validator(AuthResponseT)
 class AuthedSocketClient(SocketClient, AuthedClient):
   client_id: str
   client_secret: str = field(repr=False)
+
+  @classmethod
+  def new(cls, *, mainnet: bool = True, validate: bool = True):
+    import os
+    client_id = os.environ['DERIBIT_CLIENT_ID'] if mainnet else os.environ['TEST_DERIBIT_CLIENT_ID']
+    client_secret = os.environ['DERIBIT_CLIENT_SECRET'] if mainnet else os.environ['TEST_DERIBIT_CLIENT_SECRET']
+    return cls(
+      client_id=client_id,
+      client_secret=client_secret,
+      validate=validate,
+      domain=DERIBIT_MAINNET if mainnet else DERIBIT_TESTNET,
+    )
 
   @property
   async def ctx(self) -> AuthContext:
@@ -85,3 +97,22 @@ class AuthedSocketClient(SocketClient, AuthedClient):
       'params': params,
       'access_token': ctx.auth_data['access_token'],
     })
+  
+  async def req_subscription(self, channel: str) -> SubscribeResponse:
+    r = await self.request('/private/subscribe', {
+      'channels': [channel],
+    })
+    return validate_subscribe_response(r) if self.validate else r
+  
+  async def req_unsubscription(self, channel: str):
+    return await self.request('/private/unsubscribe', {
+      'channels': [channel],
+    })
+
+
+@dataclass(frozen=True)
+class AuthedSocketMixin(SocketMixin, AuthedClientMixin):
+  client: AuthedSocketClient
+
+  async def subscribe(self, channel: str) -> tuple[SubscribeResponse, AsyncIterable]:
+    return await self.client.subscribe(channel)
