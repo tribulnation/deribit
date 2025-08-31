@@ -84,6 +84,7 @@ class BaseSocketClient(ABC):
   async def close(self, ctx: Context, exc_type=None, exc_value=None, traceback=None):
     ctx.listener.cancel()
     await ctx.ws.__aexit__(exc_type, exc_value, traceback)
+    self._ctx = None
 
   async def listener(self, ws: websockets.ClientConnection, /):
     while True:

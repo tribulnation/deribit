@@ -82,12 +82,13 @@ class AuthedSocketClient(SocketClient, AuthedClient):
         self._ctx.auth_data = auth_data = await self.login()
         logger.info('Token refreshed successfully. New token expires in %s seconds', auth_data['expires_in'])
 
-    return AuthContext(
+    self._ctx = AuthContext(
       auth_data=auth_data,
       refresher=asyncio.create_task(refresher(auth_data)),
       ws=ctx.ws,
       listener=ctx.listener,
     )
+    return self._ctx
   
   async def authed_request(self, path: str, params=None) -> ApiResponse:
     ctx = await self.ctx
