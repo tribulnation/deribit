@@ -2,7 +2,10 @@ from dataclasses import dataclass, field
 from functools import wraps
 import httpx
 
-from deribit.core import Client, ApiResponse, UserError, DERIBIT_MAINNET, path_join, validate_response
+from deribit.core import (
+  Client, ApiResponse, DERIBIT_MAINNET, path_join, validate_response,
+  UserError, NetworkError
+)
 
 @dataclass
 class HttpClient(Client):
@@ -43,19 +46,25 @@ class HttpClient(Client):
 
   @with_client
   async def request(self, path: str, params=None) -> ApiResponse:
-    r = await self.client.post(self.base_url, json={
-      'jsonrpc': '2.0',
-      'method': path,
-      'params': params,
-    }, headers={
-      'User-Agent': 'trading-sdk',
-    })
-    return validate_response(r.text) if self.validate else r.json()
+    try:
+      r = await self.client.post(self.base_url, json={
+        'jsonrpc': '2.0',
+        'method': path,
+        'params': params,
+      }, headers={
+        'User-Agent': 'trading-sdk',
+      })
+      return validate_response(r.text) if self.validate else r.json()
+    except httpx.HTTPError as e:
+      raise NetworkError from e
   
   @with_client
   async def get(self, path: str, params=None) -> ApiResponse:
     url = path_join(self.base_url, path)
-    r = await self.client.get(url, params=params, headers={
-      'User-Agent': 'trading-sdk',
-    })
-    return validate_response(r.text) if self.validate else r.json()
+    try:
+      r = await self.client.get(url, params=params, headers={
+        'User-Agent': 'trading-sdk',
+      })
+      return validate_response(r.text) if self.validate else r.json()
+    except httpx.HTTPError as e:
+      raise NetworkError from e

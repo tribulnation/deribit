@@ -24,7 +24,7 @@ class MultiplexStreamsRPCSocketClient(RpcSocketClient[T], Generic[T, U]):
   """Multiplexed request/response and streams socket client. It uses IDs to identify requests and responses. It also supports subscription to multiple channels."""
   replies: dict[int, asyncio.Future[T]] = field(default_factory=dict, init=False, repr=False)
   counter: int = field(default=0, init=False, repr=False)
-  subscribers: dict[str, asyncio.Queue[U]	] = field(default_factory=dict, init=False, repr=False)
+  subscribers: dict[str, asyncio.Queue[U]] = field(default_factory=dict, init=False, repr=False)
 
   async def req(self, msg: Mapping) -> T:
     id = self.counter

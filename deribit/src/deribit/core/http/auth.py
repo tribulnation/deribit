@@ -3,8 +3,12 @@ import hmac
 import hashlib
 from uuid import uuid4
 import json
+import httpx
 
-from deribit.core import timestamp, AuthedClient, ApiResponse, path_join, validate_response
+from deribit.core import (
+  timestamp, AuthedClient, ApiResponse, path_join, validate_response,
+  NetworkError
+)
 from .client import HttpClient
 
 def sign(data: bytes, *, secret: str):
@@ -40,9 +44,12 @@ class AuthedHTTPClient(HttpClient, AuthedClient):
     uri = path_join(self.base_path, path)
     url = path_join(self.base_url, path)
     auth_header = self.auth_header(http_method='POST', body=body, uri=uri)
-    r = await self.client.post(url, content=body, headers={
-      'Authorization': auth_header,
-      'Content-Type': 'application/json',
-      'User-Agent': 'trading-sdk',
-    })
-    return validate_response(r.text) if self.validate else json.loads(r.text)
+    try:
+      r = await self.client.post(url, content=body, headers={
+        'Authorization': auth_header,
+        'Content-Type': 'application/json',
+        'User-Agent': 'trading-sdk',
+      })
+      return validate_response(r.text) if self.validate else json.loads(r.text)
+    except httpx.HTTPError as e:
+      raise NetworkError from e

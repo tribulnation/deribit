@@ -11,13 +11,13 @@ class BaseResponse(TypedDict):
 class OkResponse(BaseResponse, Generic[T]):
   result: T
 
-class ApiError(TypedDict):
+class ErrorData(TypedDict):
   code: int
   message: str
   data: NotRequired[Any|None]
 
 class ErrorResponse(BaseResponse):
-  error: ApiError
+  error: ErrorData
 
 ApiResponse = OkResponse[T] | ErrorResponse
 

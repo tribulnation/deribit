@@ -1,8 +1,15 @@
 from typing_extensions import TypedDict, Mapping, Any, TypeVar, Generic, NotRequired, Literal, AsyncIterable
 from dataclasses import dataclass
 import json
+import websockets
 
-from deribit.core import Client, ClientMixin, ApiError, validator, DERIBIT_MAINNET, DERIBIT_TESTNET
+from deribit.core import (
+  Client, ClientMixin, validator,
+  DERIBIT_MAINNET, DERIBIT_TESTNET,
+  NetworkError,
+  OkResponse as BaseOkResponse,
+  ErrorResponse as BaseErrorResponse,
+)
 from .multiplex_streams_rpc import MultiplexStreamsRPCSocketClient, Message
 
 T = TypeVar('T', default=Any)
@@ -17,11 +24,11 @@ class BaseResponse(BaseMessage):
   usOut: int
   usDiff: int
 
-class OkResponse(BaseResponse, Generic[T]):
-  result: T
+class OkResponse(BaseResponse, BaseOkResponse[T], Generic[T]):
+  ...
 
-class ErrorResponse(BaseResponse):
-  error: ApiError
+class ErrorResponse(BaseResponse, BaseErrorResponse):
+  ...
 
 ApiResponse = OkResponse[T] | ErrorResponse
 
@@ -56,7 +63,7 @@ class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
       validate=validate,
     )
   
-  async def req_subscription(self, channel: str):
+  async def req_subscription(self, channel: str) -> SubscribeResponse:
     r = await self.request('/public/subscribe', {
       'channels': [channel],
     })
@@ -74,7 +81,11 @@ class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
       'id': id,
       **msg,
     }
-    await (await self.ws).send(json.dumps(data), text=True)
+    ws = await self.ws
+    try:
+      await ws.send(json.dumps(data), text=True)
+    except websockets.exceptions.WebSocketException as e:
+      raise NetworkError from e
   
   def parse_msg(self, msg: str | bytes) -> Message[ApiResponse, Any]:
     r: ApiMessage = validate_message(msg) if self.validate else json.loads(msg)
@@ -93,11 +104,12 @@ class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
 
 
   async def request(self, path: str, params=None, /) -> ApiResponse:
-    return await self.req({
+    r = await self.req({
       'jsonrpc': '2.0',
       'method': path,
       'params': params,
     })
+    return r
     
 
 @dataclass(frozen=True)
