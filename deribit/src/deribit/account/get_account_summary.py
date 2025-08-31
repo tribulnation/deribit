@@ -31,7 +31,7 @@ class GetAccountSummary(AuthedClientMixin):
     - `order`: The order to place.
     - `validate`: Whether to validate the response against the expected schema.
     
-    > [Deribit API docs](https://docs.deribit.com/#private-buy)
+    > [Deribit API docs](https://docs.deribit.com/#private-get_account_summary)
     """
     params = {'currency': currency}
     if subaccount_id is not None:
