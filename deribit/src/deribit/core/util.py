@@ -31,3 +31,10 @@ def trunc2tick(x: Decimal, tick_size: Decimal) -> Decimal:
 
 def path_join(base: str, *parts: str):
   return '/'.join([base.rstrip('/')] + [part.lstrip('/') for part in parts])
+
+def getenv(var: str) -> str:
+  import os
+  try:
+    return os.environ[var]
+  except KeyError:
+    raise ValueError(f'Environment variable {var} not found')

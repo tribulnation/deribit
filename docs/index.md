@@ -15,7 +15,7 @@ pip install deribit-trading-sdk
 from deribit import Deribit
 
 async with Deribit.new(API_KEY, API_SECRET) as client:
-  candles = await client.buy('BTC_USDT', {
+  result = await client.buy('BTC_USDT', {
     'price': '50000',
     'quantity': '0.001',
     'type': 'LIMIT',

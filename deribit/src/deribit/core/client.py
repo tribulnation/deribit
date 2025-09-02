@@ -2,6 +2,7 @@ from typing_extensions import TypedDict, NotRequired, Any, Self, Literal, TypeVa
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from .validation import validator
+from .util import getenv
 
 T = TypeVar('T', default=Any)
 
@@ -87,13 +88,6 @@ class ClientMixin:
   async def __aexit__(self, exc_type, exc_value, traceback):
     await self.client.__aexit__(exc_type, exc_value, traceback)
   
-def getenv(var: str) -> str:
-  import os
-  try:
-    return os.environ[var]
-  except KeyError:
-    raise ValueError(f'Environment variable {var} not found')
-
 @dataclass(frozen=True)
 class AuthedClientMixin(ClientMixin):
   client: AuthedClient

@@ -1,9 +1,9 @@
-from typing_extensions import Literal
+from typing_extensions import Literal, AsyncIterable
 from dataclasses import dataclass
 from datetime import datetime
 
-from deribit.core import AuthedClientMixin, ApiResponse, timestamp as ts
-from .get_user_trades_by_currency import TradesResponse, validate_response
+from deribit.core import AuthedClientMixin, ApiResponse, timestamp as ts, ApiError
+from .get_user_trades_by_currency import TradesResponse, validate_response, Trade
 
 @dataclass(frozen=True)
 class GetUserTradesByInstrument(AuthedClientMixin):
@@ -23,7 +23,7 @@ class GetUserTradesByInstrument(AuthedClientMixin):
     - `instrument_name`: Instrument name
     - `start_seq`: The sequence number of the first trade to be returned
     - `end_seq`: The sequence number of the last trade to be returned
-    - `count`: Number of requested items, default - 10, maximum - 1000
+    - `count`: Number of items requested (default: 10, max: 1000)
     - `start`: The earliest timestamp to return result from
     - `end`: The most recent timestamp to return result from. Only one of start/end is truly required
     - `historical`: If true, fetches historical records (available after delay). If false (default), returns recent records only (orders for 30min, trades for 24h)
@@ -52,3 +52,45 @@ class GetUserTradesByInstrument(AuthedClientMixin):
       r['result'] = validate_response(r['result'])
     return r
   
+  async def get_user_trades_by_instrument_paged(
+    self, instrument_name: str, *,
+    start_seq: int | None = None,
+    end_seq: int | None = None,
+    count: int | None = None,
+    start: datetime | None = None,
+    end: datetime | None = None,
+    historical: bool | None = None,
+    validate: bool = True
+  ) -> AsyncIterable[list[Trade]]:
+    """Query all your trades in a given instrument, automatically paginating the results.
+    
+    - `instrument_name`: Instrument name
+    - `start_seq`: The sequence number of the first trade to be returned
+    - `end_seq`: The sequence number of the last trade to be returned
+    - `count`: Number of items per request (default: 10, max: 1000)
+    - `start`: The earliest timestamp to return result from
+    - `end`: The most recent timestamp to return result from. Only one of start/end is truly required
+    - `historical`: If true, fetches historical records (available after delay). If false (default), returns recent records only (orders for 30min, trades for 24h)
+    - `validate`: Whether to validate the response against the expected schema.
+    
+    > [Deribit API docs](https://docs.deribit.com/#private-get_user_trades_by_instrument)
+    """
+    last_seq = None
+    if count is not None:
+      count = max(count, 2) # required for pagination
+    while True:
+      r = await self.get_user_trades_by_instrument(
+        instrument_name, sorting='desc',
+        start_seq=start_seq, end_seq=end_seq, count=count,
+        start=start, end=end, historical=historical, validate=validate
+      )
+      if not 'result' in r:
+        raise ApiError(r['error'])
+      else:
+        trades = r['result']['trades']
+        yield [t for t in trades if t['trade_seq'] != last_seq]
+        if not r['result']['has_more']:
+          break
+        last_seq = end_seq = r['result']['trades'][-1]['trade_seq']
+    
+

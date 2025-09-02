@@ -5,18 +5,23 @@ from decimal import Decimal
 from deribit.core import AuthedClientMixin, ApiResponse, validator
 from .buy import OrderState
 
+Direction = Literal['buy', 'sell']
+
 class OrderStatus(TypedDict):
+  order_id: str
   filled_amount: Decimal
   oto_order_ids: NotRequired[list[str]]
   api: NotRequired[bool]
   web: NotRequired[bool]
   average_price: NotRequired[Decimal]
   post_only: NotRequired[bool]
-  direction: Literal['buy', 'sell']
+  direction: Direction
   replaced: NotRequired[bool]
   last_update_timestamp: int
   creation_timestamp: int
   order_state: OrderState
+  price: Decimal
+  amount: Decimal
 
 validate_response = validator(OrderStatus)
 

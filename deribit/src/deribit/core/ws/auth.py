@@ -92,12 +92,17 @@ class AuthedSocketClient(SocketClient, AuthedClient):
   
   async def authed_request(self, path: str, params=None) -> ApiResponse:
     ctx = await self.ctx
-    return await self.req({
+    r = await self.req({
       'jsonrpc': '2.0',
       'method': path,
       'params': params,
       'access_token': ctx.auth_data['access_token'],
     })
+    if 'error' in r and r['error']['code'] == 10028: # too many requests
+      await asyncio.sleep(0.2)
+      return await self.authed_request(path, params)
+    else:
+      return r
   
   async def req_subscription(self, channel: str) -> SubscribeResponse:
     r = await self.request('/private/subscribe', {

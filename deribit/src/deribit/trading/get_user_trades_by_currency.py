@@ -9,6 +9,7 @@ InstrumentKind = Literal['spot', 'future', 'option', 'future_combo', 'option_com
 
 class Trade(TypedDict):
   trade_id: str
+  fee: NotRequired[Decimal]
   fee_currency: NotRequired[str]
   api: NotRequired[bool]
   order_id: str

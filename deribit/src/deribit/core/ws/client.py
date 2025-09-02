@@ -1,6 +1,7 @@
 from typing_extensions import TypedDict, Mapping, Any, TypeVar, Generic, NotRequired, Literal, AsyncIterable
 from dataclasses import dataclass
 import json
+import asyncio
 import websockets
 
 from deribit.core import (
@@ -109,7 +110,11 @@ class SocketClient(MultiplexStreamsRPCSocketClient[ApiResponse, Any], Client):
       'method': path,
       'params': params,
     })
-    return r
+    if 'error' in r and r['error']['code'] == 10028: # too many requests
+      await asyncio.sleep(0.2)
+      return await self.request(path, params)
+    else:
+      return r
     
 
 @dataclass(frozen=True)

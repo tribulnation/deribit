@@ -15,6 +15,7 @@ class AccountSummary(TypedDict):
   currency: str
   balance: Decimal
   estimated_liquidation_ratio: Decimal
+  equity: Decimal
 
 validate_response = validator(AccountSummary)
 
